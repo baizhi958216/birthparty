@@ -9,7 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.17"
+    "@types/three": "^0.178.1",
+    "three": "^0.178.0",
+    "vue": "^3.5.17",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
@@ -17,5 +20,8 @@
     "typescript": "~5.8.3",
     "vite": "^7.0.4",
     "vue-tsc": "^2.2.12"
+  },
+  "volta": {
+    "node": "23.11.1"
   }
 }
