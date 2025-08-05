@@ -37,7 +37,7 @@ let positions: Float32Array;
 let initialPositions: Float32Array;
 
 // 颜色模式：'original'（原图色）或 'custom'（自定义色）
-import { reactive, watch, computed } from "vue";
+// import { reactive, watch, computed } from "vue";
 
 const colorMode = ref<'original' | 'custom'>('original');
 const customColor = ref<[number, number, number]>([1, 0.8, 0.24]);
