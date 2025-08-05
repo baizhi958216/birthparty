@@ -214,12 +214,11 @@ function loadImageAndGeneratePoints(imgSrc: string, name?: string) {
         colorsArr[i * 3 + 1] = sampledColors[i * 3 + 1];
         colorsArr[i * 3 + 2] = sampledColors[i * 3 + 2];
       } else {
-        positions[i * 3] = positions[i * 3 + 1] = positions[i * 3 + 2] = 0;
-        initialPositions[i * 3] =
-          initialPositions[i * 3 + 1] =
-          initialPositions[i * 3 + 2] =
-            0;
-        colorsArr[i * 3] = colorsArr[i * 3 + 1] = colorsArr[i * 3 + 2] = 1;
+        positions[i * 3] = positions[i * 3 + 1] = 0;
+        positions[i * 3 + 2] = 10000; // z很远
+        initialPositions[i * 3] = initialPositions[i * 3 + 1] = 0;
+        initialPositions[i * 3 + 2] = 10000;
+        colorsArr[i * 3] = colorsArr[i * 3 + 1] = colorsArr[i * 3 + 2] = 0;
       }
     }
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
