@@ -117,7 +117,7 @@ function extractTextPoints({
   return { points, colors };
 }
 
-function extractCakePoints(img: HTMLImageElement, yOffset: number): number[] {
+function extractCakePoints(img: HTMLImageElement, yOffset: number): { points: number[]; colors: number[] } {
   const maxDim = 120;
   let w = img.width,
     h = img.height;
@@ -138,6 +138,7 @@ function extractCakePoints(img: HTMLImageElement, yOffset: number): number[] {
   const imageData = ctx.getImageData(0, 0, w, h);
   const data = imageData.data;
   const points: number[] = [];
+  const colors: number[] = [];
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const idx = (y * w + x) * 4;
@@ -147,10 +148,11 @@ function extractCakePoints(img: HTMLImageElement, yOffset: number): number[] {
         a = data[idx + 3];
       if (a > 100 && r + g + b > 100) {
         points.push((x - w / 2) * 4, (h / 2 - y) * 4 + yOffset, 0);
+        colors.push(r / 255, g / 255, b / 255);
       }
     }
   }
-  return points;
+  return { points, colors };
 }
 // 加载图片并生成点云（主入口）
 function loadImageAndGeneratePoints(imgSrc: string, name?: string) {
@@ -174,15 +176,11 @@ function loadImageAndGeneratePoints(imgSrc: string, name?: string) {
   // 2. 加载蛋糕点阵
   const img = new window.Image();
   img.onload = function () {
-    const cakePoints = extractCakePoints(img, -80);
+    const { points: cakePoints, colors: cakeColors } = extractCakePoints(img, -80);
     // 合并点阵
     const allPoints = textPoints.concat(cakePoints);
     // 合并颜色
-    let allColors = textColors;
-    // 蛋糕点统一白色
-    for (let i = 0; i < cakePoints.length / 3; i++) {
-      allColors.push(1, 1, 1);
-    }
+    let allColors = textColors.concat(cakeColors);
     // 随机采样
     let sampled = allPoints;
     let sampledColors = allColors;
