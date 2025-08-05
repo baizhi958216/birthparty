@@ -2,7 +2,20 @@
   <div
     ref="container"
     style="width: 100vw; height: 100vh; position: relative"
-  ></div>
+  >
+    <div class="color-panel">
+      <label>
+        颜色模式：
+        <select v-model="colorMode" @change="onColorModeChange">
+          <option value="original">原图颜色</option>
+          <option value="custom">自定义颜色</option>
+        </select>
+      </label>
+      <template v-if="colorMode === 'custom'">
+        <input type="color" v-model="customColorHex" @input="onCustomColorChange" />
+      </template>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -22,6 +35,31 @@ let MAX_OFFSET = 10;
 let INFLUENCE_RADIUS = 100;
 let positions: Float32Array;
 let initialPositions: Float32Array;
+
+// 颜色模式：'original'（原图色）或 'custom'（自定义色）
+import { reactive, watch, computed } from "vue";
+
+const colorMode = ref<'original' | 'custom'>('original');
+const customColor = ref<[number, number, number]>([1, 0.8, 0.24]);
+// hex字符串用于input[type=color]
+const customColorHex = ref('#facc3d');
+
+function onColorModeChange() {
+  loadImageAndGeneratePoints(cakeImg);
+}
+function onCustomColorChange(e: Event) {
+  const hex = (e.target as HTMLInputElement).value;
+  customColorHex.value = hex;
+  // 转 rgb 数组
+  const rgb = [
+    parseInt(hex.slice(1, 3), 16) / 255,
+    parseInt(hex.slice(3, 5), 16) / 255,
+    parseInt(hex.slice(5, 7), 16) / 255,
+  ] as [number, number, number];
+  customColor.value = rgb;
+  loadImageAndGeneratePoints(cakeImg);
+}
+
 
 // 初始化场景、相机、渲染器
 const scene = new THREE.Scene();
@@ -180,7 +218,17 @@ function loadImageAndGeneratePoints(imgSrc: string, name?: string) {
     // 合并点阵
     const allPoints = textPoints.concat(cakePoints);
     // 合并颜色
-    let allColors = textColors.concat(cakeColors);
+    let allColors: number[];
+    if(colorMode.value === 'original') {
+      allColors = textColors.concat(cakeColors);
+    } else {
+      // 全部用 customColor 填充
+      allColors = [];
+      const totalPoints = textPoints.length / 3 + cakePoints.length / 3;
+      for(let i=0; i<totalPoints; i++) {
+        allColors.push(...customColor.value);
+      }
+    }
     // 随机采样
     let sampled = allPoints;
     let sampledColors = allColors;
@@ -327,4 +375,58 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.color-panel {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 10;
+  background: rgba(30, 30, 30, 0.93);
+  padding: 8px 14px 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0004, 0 1px 2px #fff1 inset;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+.color-panel label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.color-panel select {
+  font-size: 13px;
+  padding: 2px 10px 2px 6px;
+  border-radius: 5px;
+  border: none;
+  background: #232323;
+  color: #fff;
+  font-weight: 500;
+  outline: none;
+  transition: box-shadow 0.2s, background 0.2s;
+  box-shadow: 0 1px 2px #0002;
+}
+.color-panel select:hover {
+  background: #333;
+}
+.color-panel input[type="color"] {
+  margin-left: 6px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px #0002;
+  cursor: pointer;
+  background: #fff;
+  transition: box-shadow 0.2s;
+}
+.color-panel input[type="color"]:hover {
+  box-shadow: 0 2.5px 16px #0005;
+}
+</style>
+
